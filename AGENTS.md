@@ -38,6 +38,20 @@ Before substantial work:
 - TanStack Start code is isomorphic by default. Use `createServerFn` or server-only files before touching secrets, databases, or private APIs.
 - In `vite.config.ts`, keep TanStack Start before React when changing plugins.
 
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues; external PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default five-label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo: read root `CONTEXT.md` and `docs/adr/` when present. See `docs/agents/domain.md`.
+
 ## Next Steps
 
 - Install the CodeRabbit GitHub App for the GitHub repository and grant access to this repo.
