@@ -162,8 +162,9 @@ function readUrl(value: unknown) {
 function readHeaderValue(value: unknown): string | Array<string> | undefined {
 	if (Array.isArray(value)) {
 		const values = value
-			.filter((item): item is string | number =>
-				typeof item === 'string' || typeof item === 'number'
+			.filter(
+				(item): item is string | number =>
+					typeof item === 'string' || typeof item === 'number'
 			)
 			.map(String)
 
