@@ -27,7 +27,11 @@ const createQueryClient = () =>
 
 		mutationCache: new MutationCache({
 			onError: (error, mutation) => {
-				reportQueryError('[Mutation Error]', { mutation, error })
+				reportQueryError('[Mutation Error]', {
+					mutationKey: (mutation as { options: { mutationKey?: unknown } })
+						.options.mutationKey,
+					error,
+				})
 			},
 		}),
 	})

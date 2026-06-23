@@ -1,3 +1,4 @@
+import '@tanstack/react-start/server-only'
 import { betterAuth } from 'better-auth'
 
 import { authConfig } from '#/lib/auth/config'

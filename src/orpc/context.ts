@@ -1,3 +1,4 @@
+import '@tanstack/react-start/server-only'
 import type { LoggerContext } from '@orpc/experimental-pino'
 import type { ResponseHeadersPluginContext } from '@orpc/server/plugins'
 
@@ -9,7 +10,12 @@ interface BaseORPCContext extends ResponseHeadersPluginContext, LoggerContext {
 }
 
 export const createORPCContext = async (opts: BaseORPCContext) => {
-	const session = await auth.api.getSession({ headers: opts.headers })
+	let session: Awaited<ReturnType<typeof auth.api.getSession>> = null
+	try {
+		session = await auth.api.getSession({ headers: opts.headers })
+	} catch {
+		session = null
+	}
 
 	return { ...opts, auth: session, db }
 }

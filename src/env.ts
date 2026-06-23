@@ -42,12 +42,23 @@ export const env = createEnv({
 		APP_NAME: z.string(),
 		BETTER_AUTH_URL: z.url(),
 		BETTER_AUTH_SECRET: z.string(),
+
 		BETTER_AUTH_TRUSTED_ORIGINS: z
 			.string()
-			.refine((cors) => cors.split(',').length > 0, {
+			.transform((cors) =>
+				cors
+					.split(',')
+					.map((origin) => origin.trim())
+					.filter((origin) => origin.length > 0)
+			)
+			.refine((origins) => origins.length > 0, {
 				message: 'At least one origin is required',
 			})
-			.transform((cors) => cors.split(',')),
+			.refine(
+				(origins) =>
+					origins.every((origin) => z.url().safeParse(origin).success),
+				{ message: 'Each origin must be a valid URL' }
+			),
 		GITHUB_CLIENT_ID: z.string(),
 		GITHUB_CLIENT_SECRET: z.string(),
 	},

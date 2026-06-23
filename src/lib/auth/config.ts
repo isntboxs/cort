@@ -47,7 +47,7 @@ export const authConfig = {
 	logger: {
 		disabled: false,
 		disableColors: false,
-		level: 'debug',
+		level: env.NODE_ENV === 'development' ? 'debug' : 'error',
 	},
 	plugins: [
 		multiSessionPlugin(),

@@ -5,6 +5,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	unique,
 	uniqueIndex,
 	uuid,
 } from 'drizzle-orm/pg-core'
@@ -36,6 +37,7 @@ export const sessionTable = pgTable(
 		token: text('token').notNull().unique(),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at')
+			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())
 			.notNull(),
 		ipAddress: text('ip_address'),
@@ -69,6 +71,7 @@ export const accountTable = pgTable(
 		password: text('password'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at')
+			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())
 			.notNull(),
 	},
@@ -143,6 +146,7 @@ export const teamMemberTable = pgTable(
 	(table) => [
 		index('teamMember_teamId_idx').on(table.teamId),
 		index('teamMember_userId_idx').on(table.userId),
+		unique('teamMember_teamId_userId_uq').on(table.teamId, table.userId),
 	]
 )
 
@@ -164,6 +168,10 @@ export const memberTable = pgTable(
 	(table) => [
 		index('member_organizationId_idx').on(table.organizationId),
 		index('member_userId_idx').on(table.userId),
+		unique('member_organizationId_userId_uq').on(
+			table.organizationId,
+			table.userId
+		),
 	]
 )
 

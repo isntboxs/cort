@@ -9,6 +9,8 @@ export const Route = createFileRoute('/api/auth/$')({
 				await auth.handler(request),
 			POST: async ({ request }: { request: Request }) =>
 				await auth.handler(request),
+			OPTIONS: async ({ request }: { request: Request }) =>
+				await auth.handler(request),
 		},
 	},
 })
