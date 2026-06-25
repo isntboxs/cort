@@ -18,7 +18,11 @@ const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 	plugins: [
 		devtools(),
-		nitro({ rollupConfig: { external: nitroExternalPackages } }),
+		nitro({
+			features: { websocket: true },
+			rollupConfig: { external: nitroExternalPackages },
+			serverDir: 'server',
+		}),
 		tailwindcss(),
 		tanstackStart(),
 		viteReact(),
