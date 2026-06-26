@@ -23,9 +23,9 @@ export const issueActivityTable = pgTable(
 		organizationId: uuid('organization_id')
 			.notNull()
 			.references(() => organizationTable.id, { onDelete: 'cascade' }),
-		actorId: uuid('actor_id')
-			.notNull()
-			.references(() => userTable.id, { onDelete: 'cascade' }),
+		actorId: uuid('actor_id').references(() => userTable.id, {
+			onDelete: 'set null',
+		}),
 		eventType: text('event_type').notNull(),
 		metadata: jsonb('metadata'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),

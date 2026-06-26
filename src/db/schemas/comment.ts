@@ -22,9 +22,9 @@ export const issueCommentTable = pgTable(
 		organizationId: uuid('organization_id')
 			.notNull()
 			.references(() => organizationTable.id, { onDelete: 'cascade' }),
-		authorId: uuid('author_id')
-			.notNull()
-			.references(() => userTable.id, { onDelete: 'cascade' }),
+		authorId: uuid('author_id').references(() => userTable.id, {
+			onDelete: 'set null',
+		}),
 		body: text('body').notNull(),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at')

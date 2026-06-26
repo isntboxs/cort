@@ -42,9 +42,9 @@ export const issueTable = pgTable(
 		assigneeId: uuid('assignee_id').references(() => userTable.id, {
 			onDelete: 'set null',
 		}),
-		creatorId: uuid('creator_id')
-			.notNull()
-			.references(() => userTable.id, { onDelete: 'cascade' }),
+		creatorId: uuid('creator_id').references(() => userTable.id, {
+			onDelete: 'set null',
+		}),
 		archivedAt: timestamp('archived_at'),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at')

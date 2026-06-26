@@ -67,7 +67,7 @@ export async function seedTeamDefaults(
 					color: status.color,
 				}
 			})
-		)
+		).onConflictDoNothing()
 
 		await tx.insert(priorityTable).values(
 			defaultPriorities.map((priority) => {
@@ -79,7 +79,7 @@ export async function seedTeamDefaults(
 					color: priority.color,
 				}
 			})
-		)
+		).onConflictDoNothing()
 
 		await tx.insert(labelTable).values(
 			defaultLabels.map((label) => {
@@ -90,7 +90,7 @@ export async function seedTeamDefaults(
 					color: label.color,
 				}
 			})
-		)
+		).onConflictDoNothing()
 
 		await tx.insert(projectStatusTable).values(
 			defaultProjectStatuses.map((status) => {
@@ -102,6 +102,6 @@ export async function seedTeamDefaults(
 					color: status.color,
 				}
 			})
-		)
+		).onConflictDoNothing()
 	})
 }

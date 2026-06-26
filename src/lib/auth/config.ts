@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import {
 	multiSession as multiSessionPlugin,
@@ -62,14 +63,21 @@ export const authConfig = {
 						teamKey: {
 							type: 'string',
 							input: true,
-							required: false,
+							required: true,
 						},
 					},
 				},
 			},
 			organizationHooks: {
 				afterCreateTeam: async ({ team, organization }) => {
-					await seedTeamDefaults(organization.id, team.id)
+					try {
+						await seedTeamDefaults(organization.id, team.id)
+					} catch (error) {
+						await db
+							.delete(schema.teamTable)
+							.where(eq(schema.teamTable.id, team.id))
+						throw error
+					}
 				},
 			},
 		}),

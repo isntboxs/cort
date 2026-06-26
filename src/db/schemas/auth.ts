@@ -118,7 +118,7 @@ export const teamTable = pgTable(
 			.default(sql`pg_catalog.gen_random_uuid()`)
 			.primaryKey(),
 		name: text('name').notNull(),
-		teamKey: text('team_key'),
+		teamKey: text('team_key').notNull(),
 		organizationId: uuid('organization_id')
 			.notNull()
 			.references(() => organizationTable.id, { onDelete: 'cascade' }),
