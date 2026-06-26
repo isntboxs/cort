@@ -11,6 +11,7 @@ import type { BetterAuthOptions } from 'better-auth'
 import { db } from '#/db'
 import * as schema from '#/db/schemas'
 import { env } from '#/env'
+import { seedTeamDefaults } from '#/lib/auth/seed-team-defaults'
 
 export const authConfig = {
 	account: {
@@ -53,7 +54,25 @@ export const authConfig = {
 		multiSessionPlugin(),
 		openAPIPlugin(),
 		usernamePlugin(),
-		organizationPlugin({ teams: { enabled: true } }),
+		organizationPlugin({
+			teams: { enabled: true },
+			schema: {
+				team: {
+					additionalFields: {
+						teamKey: {
+							type: 'string',
+							input: true,
+							required: false,
+						},
+					},
+				},
+			},
+			organizationHooks: {
+				afterCreateTeam: async ({ team, organization }) => {
+					await seedTeamDefaults(organization.id, team.id)
+				},
+			},
+		}),
 		tanstackStartCookies(),
 	],
 	secret: env.BETTER_AUTH_SECRET,
