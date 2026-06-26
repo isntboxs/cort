@@ -1,13 +1,33 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
+import {
+	getFullWorkspaceQueryOptions,
+	listWorkspacesQueryOptions,
+} from '#/features/workspace/api'
+
 export const Route = createFileRoute('/')({
-	beforeLoad: ({ context: { auth } }) => {
+	beforeLoad: async ({ context: { auth, queryClient } }) => {
 		if (auth) {
-			if (!auth.session.activeOrganizationId) {
+			const workspaces = await queryClient.ensureQueryData(
+				listWorkspacesQueryOptions()
+			)
+
+			if (!auth.session.activeOrganizationId || workspaces.length === 0) {
 				throw redirect({
 					to: '/join',
 				})
 			}
+
+			const workspace = await queryClient.ensureQueryData(
+				getFullWorkspaceQueryOptions({
+					workspaceId: auth.session.activeOrganizationId,
+				})
+			)
+
+			console.debug('matched workspace', {
+				activeWorkspace: auth.session.activeOrganizationId,
+				workspace: workspace.id,
+			})
 		}
 	},
 	component: Home,

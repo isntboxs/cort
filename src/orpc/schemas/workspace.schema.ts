@@ -1,6 +1,23 @@
 import limax from 'limax'
 import { z } from 'zod'
 
+const workspaceBaseField = {
+	id: z.uuid(),
+	name: z.string(),
+	slug: z.string(),
+	logo: z.string().nullable().optional(),
+	metadata: z.unknown(),
+	createdAt: z.date(),
+}
+
+export const workspaceMemberBaseSchema = z.object({
+	id: z.uuid(),
+	workspaceId: z.uuid(),
+	userId: z.uuid(),
+	role: z.string(),
+	createdAt: z.date(),
+})
+
 export const workspaceCreateInputSchema = z.object({
 	name: z
 		.string()
@@ -19,22 +36,62 @@ export const workspaceCreateInputSchema = z.object({
 })
 
 export const workspaceCreateOutputSchema = z.object({
-	id: z.uuid(),
-	name: z.string(),
-	slug: z.string(),
-	logo: z.string().nullable().optional(),
-	metadata: z.unknown(),
-	createdAt: z.date(),
-	members: z.array(
+	...workspaceBaseField,
+	members: z.array(workspaceMemberBaseSchema),
+})
+
+export const workspaceGetFullInputSchema = z
+	.object({
+		workspaceId: z.uuid().optional(),
+		workspaceSlug: z.string().optional(),
+		membersLimit: z.string().or(z.number()).optional(),
+	})
+	.optional()
+
+export type WorkspaceGetFullInput = z.infer<typeof workspaceGetFullInputSchema>
+
+export const workspaceGetFullOutputSchema = z.object({
+	...workspaceBaseField,
+	metadata: z.unknown().optional(),
+	invitations: z.array(
 		z.object({
 			id: z.uuid(),
-			organizationId: z.uuid(),
 			workspaceId: z.uuid(),
-			userId: z.uuid(),
-			role: z.string(),
+			email: z.email(),
+			role: z.enum(['owner', 'member', 'admin']),
+			status: z.enum(['canceled', 'pending', 'accepted', 'rejected']),
+			inviterId: z.uuid(),
+			expiresAt: z.date(),
 			createdAt: z.date(),
+			teamId: z.uuid().optional(),
+		})
+	),
+	members: z.array(
+		workspaceMemberBaseSchema.omit({ role: true }).extend({
+			role: z.enum(['owner', 'member', 'admin']),
+			teamId: z.uuid().optional(),
+			user: z.object({
+				id: z.uuid(),
+				email: z.string(),
+				name: z.string(),
+				image: z.string().optional(),
+			}),
+		})
+	),
+	teams: z.array(
+		z.object({
+			id: z.uuid(),
+			workspaceId: z.uuid(),
+			name: z.string(),
+			createdAt: z.date(),
+			updatedAt: z.date().optional(),
 		})
 	),
 })
 
-export type WorkspaceCreateOutput = z.infer<typeof workspaceCreateOutputSchema>
+export const workspaceListOutputSchema = z.array(
+	z
+		.object(workspaceBaseField)
+		.omit({ metadata: true })
+		.extend({ metadata: z.unknown().optional() })
+)
