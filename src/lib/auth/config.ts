@@ -1,3 +1,5 @@
+import '@tanstack/react-start/server-only'
+import { eq } from 'drizzle-orm'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import {
 	multiSession as multiSessionPlugin,
@@ -11,6 +13,7 @@ import type { BetterAuthOptions } from 'better-auth'
 import { db } from '#/db'
 import * as schema from '#/db/schemas'
 import { env } from '#/env'
+import { seedTeamDefaults } from '#/lib/auth/seed-team-defaults'
 
 export const authConfig = {
 	account: {
@@ -53,7 +56,32 @@ export const authConfig = {
 		multiSessionPlugin(),
 		openAPIPlugin(),
 		usernamePlugin(),
-		organizationPlugin({ teams: { enabled: true } }),
+		organizationPlugin({
+			teams: { enabled: true },
+			schema: {
+				team: {
+					additionalFields: {
+						teamKey: {
+							type: 'string',
+							input: true,
+							required: true,
+						},
+					},
+				},
+			},
+			organizationHooks: {
+				afterCreateTeam: async ({ team, organization }) => {
+					try {
+						await seedTeamDefaults(organization.id, team.id)
+					} catch (error) {
+						await db
+							.delete(schema.teamTable)
+							.where(eq(schema.teamTable.id, team.id))
+						throw error
+					}
+				},
+			},
+		}),
 		tanstackStartCookies(),
 	],
 	secret: env.BETTER_AUTH_SECRET,
