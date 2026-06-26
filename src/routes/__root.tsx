@@ -12,6 +12,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { AppUpdateToast } from '#/components/providers/app-update-toast'
 import { ThemeProvider } from '#/components/providers/theme-provider'
 import { Toaster } from '#/components/ui/sonner'
+import { getAuthFn } from '#/functions/auth.fn'
 import type { orpc } from '#/orpc/client'
 import appCss from '#/styles.css?url'
 
@@ -21,6 +22,11 @@ interface AppRouterContext {
 }
 
 export const Route = createRootRouteWithContext<AppRouterContext>()({
+	beforeLoad: async () => {
+		const auth = await getAuthFn()
+
+		return { auth }
+	},
 	head: () => {
 		return {
 			meta: [

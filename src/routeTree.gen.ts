@@ -9,14 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProtectedJoinRouteImport } from './routes/_protected/join'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedRoute = ProtectedRouteImport.update({
+  id: '/_protected',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProtectedJoinRoute = ProtectedJoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => ProtectedRoute,
 } as any)
 const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: '/api/rpc/$',
@@ -31,42 +48,79 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/join': typeof ProtectedJoinRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/join': typeof ProtectedJoinRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_protected': typeof ProtectedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_protected/join': typeof ProtectedJoinRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/auth/$' | '/api/rpc/$'
+  fullPaths: '/' | '/login' | '/join' | '/api/auth/$' | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/auth/$' | '/api/rpc/$'
-  id: '__root__' | '/' | '/api/auth/$' | '/api/rpc/$'
+  to: '/' | '/login' | '/join' | '/api/auth/$' | '/api/rpc/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/_protected'
+    | '/login'
+    | '/_protected/join'
+    | '/api/auth/$'
+    | '/api/rpc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ProtectedRoute: typeof ProtectedRouteWithChildren
+  LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_protected': {
+      id: '/_protected'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProtectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_protected/join': {
+      id: '/_protected/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof ProtectedJoinRouteImport
+      parentRoute: typeof ProtectedRoute
     }
     '/api/rpc/$': {
       id: '/api/rpc/$'
@@ -85,8 +139,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProtectedRouteChildren {
+  ProtectedJoinRoute: typeof ProtectedJoinRoute
+}
+
+const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedJoinRoute: ProtectedJoinRoute,
+}
+
+const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
+  ProtectedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProtectedRoute: ProtectedRouteWithChildren,
+  LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }

@@ -9,5 +9,6 @@
 		"**/routeTree.gen.ts": true
 	},
 	"editor.defaultFormatter": "oxc.oxc-vscode",
-	"editor.formatOnSave": true
+	"editor.formatOnSave": true,
+	"oxc.configPath": "./oxlint.config.ts"
 }
