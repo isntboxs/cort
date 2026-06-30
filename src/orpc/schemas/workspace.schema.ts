@@ -83,7 +83,7 @@ export const workspaceGetFullOutputSchema = z.object({
 			id: z.uuid(),
 			workspaceId: z.uuid(),
 			name: z.string(),
-			teamKey: z.string(),
+			key: z.string(),
 			createdAt: z.date(),
 			updatedAt: z.date().optional(),
 		})

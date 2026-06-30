@@ -1,5 +1,4 @@
 import '@tanstack/react-start/server-only'
-import { eq } from 'drizzle-orm'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import {
 	multiSession as multiSessionPlugin,
@@ -8,11 +7,13 @@ import {
 	organization as organizationPlugin,
 } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
+import { eq } from 'drizzle-orm'
 import type { BetterAuthOptions } from 'better-auth'
 
 import { db } from '#/db'
 import * as schema from '#/db/schemas'
 import { env } from '#/env'
+import { generateTeamKey } from '#/lib/auth/generate-team-key'
 import { seedTeamDefaults } from '#/lib/auth/seed-team-defaults'
 
 export const authConfig = {
@@ -61,7 +62,7 @@ export const authConfig = {
 			schema: {
 				team: {
 					additionalFields: {
-						teamKey: {
+						key: {
 							type: 'string',
 							input: true,
 							required: true,
@@ -70,6 +71,31 @@ export const authConfig = {
 				},
 			},
 			organizationHooks: {
+				afterCreateOrganization: async ({ organization }) => {
+					const key = await generateTeamKey(
+						organization.id,
+						organization.name
+					)
+
+					const [team] = await db
+						.insert(schema.teamTable)
+						.values({
+							name: organization.name,
+							key,
+							organizationId: organization.id,
+							createdAt: new Date(),
+						})
+						.returning({ id: schema.teamTable.id })
+
+					try {
+						await seedTeamDefaults(organization.id, team.id)
+					} catch (error) {
+						await db
+							.delete(schema.teamTable)
+							.where(eq(schema.teamTable.id, team.id))
+						throw error
+					}
+				},
 				afterCreateTeam: async ({ team, organization }) => {
 					try {
 						await seedTeamDefaults(organization.id, team.id)
