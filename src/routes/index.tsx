@@ -24,9 +24,13 @@ export const Route = createFileRoute('/')({
 				})
 			)
 
-			console.debug('matched workspace', {
-				activeWorkspace: auth.session.activeOrganizationId,
-				workspace: workspace.id,
+			throw redirect({
+				to: '/$workspaceSlug',
+				params: {
+					workspaceSlug: workspace.slug,
+				},
+				replace: true,
+				viewTransition: true,
 			})
 		}
 	},

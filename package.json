@@ -36,6 +36,8 @@
 		"@tabler/icons-react": "^3.44.0",
 		"@tailwindcss/vite": "^4.1.18",
 		"@tanstack/react-devtools": "latest",
+		"@tanstack/react-form-devtools": "^0.2.29",
+		"@tanstack/react-form-start": "^1.33.0",
 		"@tanstack/react-query": "^5.101.1",
 		"@tanstack/react-query-devtools": "^5.101.1",
 		"@tanstack/react-router": "latest",

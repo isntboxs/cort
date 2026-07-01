@@ -71,29 +71,13 @@ export const authConfig = {
 				},
 			},
 			organizationHooks: {
-				afterCreateOrganization: async ({ organization }) => {
-					const key = await generateTeamKey(
-						organization.id,
-						organization.name
-					)
-
-					const [team] = await db
-						.insert(schema.teamTable)
-						.values({
-							name: organization.name,
-							key,
-							organizationId: organization.id,
-							createdAt: new Date(),
-						})
-						.returning({ id: schema.teamTable.id })
-
-					try {
-						await seedTeamDefaults(organization.id, team.id)
-					} catch (error) {
-						await db
-							.delete(schema.teamTable)
-							.where(eq(schema.teamTable.id, team.id))
-						throw error
+				beforeCreateTeam: async ({ team, organization }) => {
+					if (!team.key) {
+						const key = await generateTeamKey(
+							organization.id,
+							team.name
+						)
+						return { data: { key } }
 					}
 				},
 				afterCreateTeam: async ({ team, organization }) => {

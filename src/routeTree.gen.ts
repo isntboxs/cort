@@ -13,8 +13,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedJoinRouteImport } from './routes/_protected/join'
+import { Route as ProtectedWorkspaceSlugRouteImport } from './routes/_protected/$workspaceSlug'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as ProtectedWorkspaceSlugTeamRouteImport } from './routes/_protected/$workspaceSlug.team'
+import { Route as ProtectedWorkspaceSlugTeamTeamKeyRouteImport } from './routes/_protected/$workspaceSlug.team.$teamKey'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -35,6 +38,11 @@ const ProtectedJoinRoute = ProtectedJoinRouteImport.update({
   path: '/join',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedWorkspaceSlugRoute = ProtectedWorkspaceSlugRouteImport.update({
+  id: '/$workspaceSlug',
+  path: '/$workspaceSlug',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: '/api/rpc/$',
   path: '/api/rpc/$',
@@ -45,43 +53,83 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedWorkspaceSlugTeamRoute =
+  ProtectedWorkspaceSlugTeamRouteImport.update({
+    id: '/team',
+    path: '/team',
+    getParentRoute: () => ProtectedWorkspaceSlugRoute,
+  } as any)
+const ProtectedWorkspaceSlugTeamTeamKeyRoute =
+  ProtectedWorkspaceSlugTeamTeamKeyRouteImport.update({
+    id: '/$teamKey',
+    path: '/$teamKey',
+    getParentRoute: () => ProtectedWorkspaceSlugTeamRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/$workspaceSlug': typeof ProtectedWorkspaceSlugRouteWithChildren
   '/join': typeof ProtectedJoinRoute
+  '/$workspaceSlug/team': typeof ProtectedWorkspaceSlugTeamRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/$workspaceSlug/team/$teamKey': typeof ProtectedWorkspaceSlugTeamTeamKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/$workspaceSlug': typeof ProtectedWorkspaceSlugRouteWithChildren
   '/join': typeof ProtectedJoinRoute
+  '/$workspaceSlug/team': typeof ProtectedWorkspaceSlugTeamRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/$workspaceSlug/team/$teamKey': typeof ProtectedWorkspaceSlugTeamTeamKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_protected/$workspaceSlug': typeof ProtectedWorkspaceSlugRouteWithChildren
   '/_protected/join': typeof ProtectedJoinRoute
+  '/_protected/$workspaceSlug/team': typeof ProtectedWorkspaceSlugTeamRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
+  '/_protected/$workspaceSlug/team/$teamKey': typeof ProtectedWorkspaceSlugTeamTeamKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/join' | '/api/auth/$' | '/api/rpc/$'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/$workspaceSlug'
+    | '/join'
+    | '/$workspaceSlug/team'
+    | '/api/auth/$'
+    | '/api/rpc/$'
+    | '/$workspaceSlug/team/$teamKey'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/join' | '/api/auth/$' | '/api/rpc/$'
+  to:
+    | '/'
+    | '/login'
+    | '/$workspaceSlug'
+    | '/join'
+    | '/$workspaceSlug/team'
+    | '/api/auth/$'
+    | '/api/rpc/$'
+    | '/$workspaceSlug/team/$teamKey'
   id:
     | '__root__'
     | '/'
     | '/_protected'
     | '/login'
+    | '/_protected/$workspaceSlug'
     | '/_protected/join'
+    | '/_protected/$workspaceSlug/team'
     | '/api/auth/$'
     | '/api/rpc/$'
+    | '/_protected/$workspaceSlug/team/$teamKey'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -122,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedJoinRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/$workspaceSlug': {
+      id: '/_protected/$workspaceSlug'
+      path: '/$workspaceSlug'
+      fullPath: '/$workspaceSlug'
+      preLoaderRoute: typeof ProtectedWorkspaceSlugRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/api/rpc/$': {
       id: '/api/rpc/$'
       path: '/api/rpc/$'
@@ -136,14 +191,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/$workspaceSlug/team': {
+      id: '/_protected/$workspaceSlug/team'
+      path: '/team'
+      fullPath: '/$workspaceSlug/team'
+      preLoaderRoute: typeof ProtectedWorkspaceSlugTeamRouteImport
+      parentRoute: typeof ProtectedWorkspaceSlugRoute
+    }
+    '/_protected/$workspaceSlug/team/$teamKey': {
+      id: '/_protected/$workspaceSlug/team/$teamKey'
+      path: '/$teamKey'
+      fullPath: '/$workspaceSlug/team/$teamKey'
+      preLoaderRoute: typeof ProtectedWorkspaceSlugTeamTeamKeyRouteImport
+      parentRoute: typeof ProtectedWorkspaceSlugTeamRoute
+    }
   }
 }
 
+interface ProtectedWorkspaceSlugTeamRouteChildren {
+  ProtectedWorkspaceSlugTeamTeamKeyRoute: typeof ProtectedWorkspaceSlugTeamTeamKeyRoute
+}
+
+const ProtectedWorkspaceSlugTeamRouteChildren: ProtectedWorkspaceSlugTeamRouteChildren =
+  {
+    ProtectedWorkspaceSlugTeamTeamKeyRoute:
+      ProtectedWorkspaceSlugTeamTeamKeyRoute,
+  }
+
+const ProtectedWorkspaceSlugTeamRouteWithChildren =
+  ProtectedWorkspaceSlugTeamRoute._addFileChildren(
+    ProtectedWorkspaceSlugTeamRouteChildren,
+  )
+
+interface ProtectedWorkspaceSlugRouteChildren {
+  ProtectedWorkspaceSlugTeamRoute: typeof ProtectedWorkspaceSlugTeamRouteWithChildren
+}
+
+const ProtectedWorkspaceSlugRouteChildren: ProtectedWorkspaceSlugRouteChildren =
+  {
+    ProtectedWorkspaceSlugTeamRoute:
+      ProtectedWorkspaceSlugTeamRouteWithChildren,
+  }
+
+const ProtectedWorkspaceSlugRouteWithChildren =
+  ProtectedWorkspaceSlugRoute._addFileChildren(
+    ProtectedWorkspaceSlugRouteChildren,
+  )
+
 interface ProtectedRouteChildren {
+  ProtectedWorkspaceSlugRoute: typeof ProtectedWorkspaceSlugRouteWithChildren
   ProtectedJoinRoute: typeof ProtectedJoinRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedWorkspaceSlugRoute: ProtectedWorkspaceSlugRouteWithChildren,
   ProtectedJoinRoute: ProtectedJoinRoute,
 }
 
