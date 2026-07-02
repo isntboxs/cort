@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
+import { WorkspaceSidebarShell } from '#/features/app-shell/components/workspace-sidebar-shell'
 import { getFullWorkspaceQueryOptions } from '#/features/workspace/api'
 
 export const Route = createFileRoute('/_protected/$workspaceSlug')({
@@ -44,5 +45,9 @@ export const Route = createFileRoute('/_protected/$workspaceSlug')({
 })
 
 function RouteComponent() {
-	return <Outlet />
+	return (
+		<WorkspaceSidebarShell>
+			<Outlet />
+		</WorkspaceSidebarShell>
+	)
 }

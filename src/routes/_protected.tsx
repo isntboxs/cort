@@ -10,6 +10,8 @@ export const Route = createFileRoute('/_protected')({
 				},
 			})
 		}
+
+		return { auth }
 	},
 	component: () => <Outlet />,
 })

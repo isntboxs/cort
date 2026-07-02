@@ -1,6 +1,8 @@
 import { useForm } from '@tanstack/react-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from '@tanstack/react-router'
+import { useNavigate, useRouter } from '@tanstack/react-router'
+
+import { useRef } from 'react'
 
 import limax from 'limax'
 import { toast } from 'sonner'
@@ -16,7 +18,6 @@ import {
 } from '#/components/ui/card'
 import {
 	Field,
-	FieldDescription,
 	FieldError,
 	FieldGroup,
 	FieldLabel,
@@ -37,12 +38,23 @@ const formSchema = workspaceCreateInputSchema
 
 export const CreateWorkspaceForm = () => {
 	const router = useRouter()
+	const navigate = useNavigate()
 	const queryClient = useQueryClient()
+
+	const userEditedSlugRef = useRef(false)
+
 	const createWorkspaceMutation = useMutation(
 		workspaceORPC.create.mutationOptions({
-			onSuccess: async () => {
+			onSuccess: async (data) => {
 				await queryClient.invalidateQueries()
 				await router.invalidate({ sync: true })
+				await navigate({
+					to: '/$workspaceSlug',
+					params: {
+						workspaceSlug: data.slug,
+					},
+					viewTransition: true,
+				})
 			},
 			onError: (error) => {
 				toast.error('Failed to create workspace. Please try again later.', {
@@ -67,13 +79,14 @@ export const CreateWorkspaceForm = () => {
 	})
 
 	return (
-		<Card className="mx-auto w-full max-w-md bg-transparent ring-0">
-			<CardHeader>
-				<CardTitle className="text-xl font-semibold">
-					Create a Workspace
+		<Card className="mx-auto w-full max-w-md gap-8 bg-transparent ring-0">
+			<CardHeader className="gap-2 text-center">
+				<CardTitle className="text-2xl font-semibold">
+					Create a workspace
 				</CardTitle>
-				<CardDescription className="text-sm text-muted-foreground">
-					Your Default Team and starter workflow are created automatically.
+
+				<CardDescription className="text-base text-muted-foreground">
+					Move forward across teams.
 				</CardDescription>
 			</CardHeader>
 
@@ -89,12 +102,18 @@ export const CreateWorkspaceForm = () => {
 					<FieldGroup>
 						<form.Field
 							name="name"
+							listeners={{
+								onChange: ({ value }) => {
+									if (userEditedSlugRef.current) return
+									form.setFieldValue('slug', limax(value))
+								},
+							}}
 							children={(field) => {
 								const isInvalid =
 									field.state.meta.isTouched && !field.state.meta.isValid
 								return (
 									<Field data-invalid={isInvalid}>
-										<FieldLabel htmlFor={field.name}>Workspace name</FieldLabel>
+										<FieldLabel htmlFor={field.name}>Name</FieldLabel>
 
 										<Input
 											id={field.name}
@@ -109,10 +128,6 @@ export const CreateWorkspaceForm = () => {
 											autoComplete="organization"
 										/>
 
-										<FieldDescription>
-											The Default Team will use this name.
-										</FieldDescription>
-
 										{isInvalid && (
 											<FieldError errors={field.state.meta.errors} />
 										)}
@@ -121,49 +136,45 @@ export const CreateWorkspaceForm = () => {
 							}}
 						/>
 
-						<form.Subscribe
-							selector={(state) => state.values.name}
-							children={(name) => (
-								<form.Field
-									name="slug"
-									children={(field) => {
-										const isInvalid =
-											field.state.meta.isTouched && !field.state.meta.isValid
-										const value = field.state.value || limax(name)
-										return (
-											<Field data-invalid={isInvalid}>
-												<FieldLabel htmlFor={field.name}>
-													Workspace URL
-												</FieldLabel>
+						<form.Field
+							name="slug"
+							children={(field) => {
+								const isInvalid =
+									field.state.meta.isTouched && !field.state.meta.isValid
+								return (
+									<Field data-invalid={isInvalid}>
+										<FieldLabel htmlFor={field.name}>URL</FieldLabel>
 
-												<InputGroup>
-													<InputGroupAddon>
-														<InputGroupText>{env.VITE_APP_URL}/</InputGroupText>
-													</InputGroupAddon>
+										<InputGroup className="border-l-0">
+											<InputGroupAddon className="rounded-l-lg border-r border-border bg-muted pr-1.5">
+												<InputGroupText>{env.VITE_APP_URL}/</InputGroupText>
+											</InputGroupAddon>
 
-													<InputGroupInput
-														id={field.name}
-														name={field.name}
-														value={value}
-														onBlur={field.handleBlur}
-														onChange={(e) => {
-															field.handleChange(e.target.value)
-														}}
-														aria-invalid={isInvalid}
-														placeholder="acme-product"
-														autoComplete="off"
-														className="pl-0.5"
-													/>
-												</InputGroup>
+											<InputGroupInput
+												id={field.name}
+												name={field.name}
+												value={field.state.value}
+												onBlur={(e) => {
+													field.handleChange(limax(e.target.value))
+													field.handleBlur()
+												}}
+												onChange={(e) => {
+													userEditedSlugRef.current = true
+													field.handleChange(e.target.value)
+												}}
+												aria-invalid={isInvalid}
+												placeholder="acme-product"
+												autoComplete="off"
+												className="pl-0.5"
+											/>
+										</InputGroup>
 
-												{isInvalid && (
-													<FieldError errors={field.state.meta.errors} />
-												)}
-											</Field>
-										)
-									}}
-								/>
-							)}
+										{isInvalid && (
+											<FieldError errors={field.state.meta.errors} />
+										)}
+									</Field>
+								)
+							}}
 						/>
 					</FieldGroup>
 				</form>
